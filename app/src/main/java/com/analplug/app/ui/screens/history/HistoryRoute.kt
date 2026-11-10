@@ -7,14 +7,12 @@ import com.analplug.app.data.repository.WearSessionRepository
 
 @Composable
 fun HistoryRoute(
-    wearSessionRepository: WearSessionRepository,
-    onSessionClick: (Long) -> Unit = {}
+    wearSessionRepository: WearSessionRepository
 ) {
     val sessions by wearSessionRepository.getAllSessionsWithPlug()
         .collectAsState(initial = emptyList())
 
     HistoryScreen(
-        sessions = sessions,
-        onSessionClick = onSessionClick
+        sessions = sessions
     )
 }
