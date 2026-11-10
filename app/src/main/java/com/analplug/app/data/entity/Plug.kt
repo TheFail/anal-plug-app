@@ -7,12 +7,12 @@ import androidx.room.PrimaryKey
 data class Plug(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val shortName: String,
-    val photoPath: String? = null,          // local file path for optional photo
+    val photoPath: String? = null,
     val material: String? = null,
     val shape: String? = null,
-    val size: String? = null,               // free text (e.g. "S", "40mm", "medium")
+    val size: String? = null,
     val hasVibration: Boolean = false,
     val hasRemoteApp: Boolean = false,
-    val remoteAppPackage: String? = null,   // package name for shortcut to installed app
+    val remoteAppPackage: String? = null,
     val description: String? = null
 )

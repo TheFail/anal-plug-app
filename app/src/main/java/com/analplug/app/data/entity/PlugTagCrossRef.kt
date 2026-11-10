@@ -21,7 +21,7 @@ import androidx.room.Index
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("tagId")]
+    indices = [Index("plugId"), Index("tagId")]
 )
 data class PlugTagCrossRef(
     val plugId: Long,
