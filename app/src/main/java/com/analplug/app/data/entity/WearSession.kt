@@ -20,7 +20,7 @@ import androidx.room.PrimaryKey
 data class WearSession(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val plugId: Long,
-    val startTime: Long,                   // epoch millis
-    val endTime: Long? = null,             // null = still wearing / ongoing
+    val startTime: Long,
+    val endTime: Long? = null,
     val notes: String? = null
 )
