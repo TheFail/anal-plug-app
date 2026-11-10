@@ -1,8 +1,10 @@
 package com.analplug.app.ui.screens.plugs
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,7 +12,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Label
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -60,10 +65,15 @@ fun PlugListScreen(
             ) {
                 Text("No plugs yet", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Tap + to add your first plug",
+                    "Tap the button below or the + to add your first plug",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
                 )
+                Button(onClick = onAddClick) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Text("Add Plug", modifier = Modifier.padding(start = 8.dp))
+                }
             }
         } else {
             LazyColumn(
@@ -73,14 +83,43 @@ fun PlugListScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(plugs) { item ->
-                    Text(
-                        text = item.plug.shortName,
-                        style = MaterialTheme.typography.bodyLarge,
+                items(plugs, key = { it.plug.id }) { item ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
-                    )
+                            .clickable { onPlugClick(item.plug.id) }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = item.plug.shortName,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                val subtitle = listOfNotNull(
+                                    item.plug.material,
+                                    item.plug.size
+                                ).joinToString(" · ")
+                                if (subtitle.isNotBlank()) {
+                                    Text(
+                                        text = subtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Icon(
+                                Icons.Default.ChevronRight,
+                                contentDescription = "Open",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }
