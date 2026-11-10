@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.analplug.app.data.relation.WearSessionWithPlug
 import java.text.SimpleDateFormat
@@ -43,7 +44,7 @@ fun HistoryScreen(
                     "No sessions yet",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
             }
         } else {
@@ -67,7 +68,7 @@ private fun SessionCard(item: WearSessionWithPlug) {
     val dateFormat = SimpleDateFormat("MMM d, yyyy HH:mm", Locale.getDefault())
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(item.plug.name, style = MaterialTheme.typography.titleMedium)
+            Text(item.plug.shortName, style = MaterialTheme.typography.titleMedium)
             Text(
                 dateFormat.format(Date(item.session.startTime)),
                 style = MaterialTheme.typography.bodySmall,
