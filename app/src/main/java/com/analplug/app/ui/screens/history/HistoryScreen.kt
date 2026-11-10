@@ -26,7 +26,9 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    sessions: List<WearSessionWithPlug>
+    sessions: List<WearSessionWithPlug>,
+    onSessionClick: (Long) -> Unit = {},
+    onEditNotes: (Long) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
