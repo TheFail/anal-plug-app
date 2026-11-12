@@ -3,6 +3,7 @@ package com.analplug.app.ui.screens.plugs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -104,7 +105,6 @@ fun PlugListScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Small photo icon
                             val photoFile = item.plug.photoPath?.let { File(it) }
                             if (photoFile != null && photoFile.exists()) {
                                 Image(
@@ -158,12 +158,5 @@ fun PlugListScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun Box(modifier: Modifier, contentAlignment: Alignment, content: @Composable () -> Unit) {
-    androidx.compose.foundation.layout.Box(modifier = modifier, contentAlignment = contentAlignment) {
-        content()
     }
 }
