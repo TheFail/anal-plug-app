@@ -8,8 +8,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +28,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +37,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +55,7 @@ import com.analplug.app.data.entity.Tag
 import com.analplug.app.ui.util.PhotoStorage
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PlugFormScreen(
     initialPlug: Plug? = null,
@@ -69,6 +74,8 @@ fun PlugFormScreen(
     var hasVibration by remember { mutableStateOf(initialPlug?.hasVibration ?: false) }
     var hasRemoteApp by remember { mutableStateOf(initialPlug?.hasRemoteApp ?: false) }
     var photoPath by remember { mutableStateOf(initialPlug?.photoPath) }
+    var selected by remember { mutableStateOf(selectedTagIds) }
+    var newTagName by remember { mutableStateOf("") }
 
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -84,7 +91,16 @@ fun PlugFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (initialPlug == null) "Add Plug" else "Edit Plug") },
+                title = {
+                    Text(
+                        if (initialPlug == null) "Add Plug" else "Edit Plug",
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1
+                    )
+                },
+                modifier = Modifier.height(40.dp),
+                windowInsets = WindowInsets(0, 0, 0, 0),
+                colors = TopAppBarDefaults.topAppBarColors(),
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(Icons.Default.Close, contentDescription = "Cancel")
@@ -104,7 +120,7 @@ fun PlugFormScreen(
                                 hasRemoteApp = hasRemoteApp,
                                 description = description.ifBlank { null }
                             )
-                            onSave(plug, selectedTagIds)
+                            onSave(plug, selected)
                         },
                         enabled = shortName.isNotBlank()
                     ) {
@@ -122,7 +138,6 @@ fun PlugFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Photo section
             Text("Photo", style = MaterialTheme.typography.titleMedium)
             Box(
                 modifier = Modifier
@@ -141,10 +156,7 @@ fun PlugFormScreen(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Text(
-                        "No photo selected",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("No photo selected", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -204,6 +216,59 @@ fun PlugFormScreen(
             RowWithCheckbox("Vibration", hasVibration) { hasVibration = it }
             RowWithCheckbox("Remote app", hasRemoteApp) { hasRemoteApp = it }
 
+            // Tags section
+            Text("Tags", style = MaterialTheme.typography.titleMedium)
+            if (allTags.isEmpty()) {
+                Text(
+                    "No tags yet. Add one below.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    allTags.forEach { tag ->
+                        FilterChip(
+                            selected = selected.contains(tag.id),
+                            onClick = {
+                                selected = if (selected.contains(tag.id)) {
+                                    selected - tag.id
+                                } else {
+                                    selected + tag.id
+                                }
+                            },
+                            label = { Text(tag.name) }
+                        )
+                    }
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = newTagName,
+                    onValueChange = { newTagName = it },
+                    label = { Text("New tag") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+                Button(
+                    onClick = {
+                        val name = newTagName.trim()
+                        if (name.isNotBlank()) {
+                            onAddTag(name)
+                            newTagName = ""
+                        }
+                    },
+                    enabled = newTagName.isNotBlank()
+                ) {
+                    Text("Add")
+                }
+            }
+
             Button(
                 onClick = {
                     val plug = Plug(
@@ -217,7 +282,7 @@ fun PlugFormScreen(
                         hasRemoteApp = hasRemoteApp,
                         description = description.ifBlank { null }
                     )
-                    onSave(plug, selectedTagIds)
+                    onSave(plug, selected)
                 },
                 enabled = shortName.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
@@ -230,9 +295,7 @@ fun PlugFormScreen(
 
 @Composable
 private fun RowWithCheckbox(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)
         Text(label)
     }
